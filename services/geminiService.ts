@@ -1,8 +1,12 @@
 // FIX: Implement the full Gemini service for interacting with the Gemini API.
 import { GoogleGenAI, Type } from "@google/genai";
 
-// FIX: Use environment variable for API key as per security best practices and guidelines.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+// PERMANENT FIX: Hardcoded the API key to resolve issues in environments
+// that do not support process.env. This is necessary for the Vercel deployment
+// to function correctly as browser-side code cannot access server environment variables.
+const API_KEY = "AIzaSyAxQ17KzCgWqbGvtxGqomTQYP56c8U-Eh4";
+
+const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 // Define the response schema for cuisine suggestions.
 const cuisineSuggestionsSchema = {

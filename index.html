@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>午餐吃什麼？隨機美食選擇器</title>
+    <style>
+        :root {
+          --bg-gradient-start: #1f2937;
+          --bg-gradient-end: #111827;
+          --text-primary: #f9fafb;
+          --text-secondary: #9ca3af;
+          --accent-gold: #f59e0b;
+          --card-bg: rgba(31, 41, 55, 0.5);
+          --card-border: rgba(255, 255, 255, 0.1);
+          --btn-primary-start: #4f46e5;
+          --btn-primary-end: #7c3aed;
+          --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        }
+
+        /* Base Styles & Dark Theme */
+        body, html {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          font-family: var(--font-family-sans);
+          background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+          color: var(--text-primary);
+          overflow: hidden;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        
+        #root {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Card Styling with Frosted Glass Effect */
+        .card {
+          background: var(--card-bg);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border-radius: 16px;
+          border: 1px solid var(--card-border);
+          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+          transition: all 0.3s ease;
+        }
+
+        /* Button Styling */
+        .btn {
+          padding: 0.75rem 1.5rem;
+          border-radius: 12px;
+          border: none;
+          font-weight: 600;
+          color: white;
+          cursor: pointer;
+          transition: all 0.2s ease-in-out;
+          outline: none;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        .btn:hover:not(:disabled) {
+          transform: scale(1.02);
+          filter: brightness(1.1);
+        }
+        .btn:active:not(:disabled) {
+          transform: scale(0.98);
+        }
+        .btn-primary {
+          background: linear-gradient(90deg, var(--btn-primary-start), var(--btn-primary-end));
+        }
+        .btn-secondary {
+          background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Text Styles */
+        .text-accent-gold {
+          color: var(--accent-gold);
+        }
+        
+        /* Utility & Animations */
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 0.4s ease-out forwards;
+        }
+
+        @keyframes slide-in-up {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .animate-slide-in-up {
+            animation: slide-in-up 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @keyframes bobbing {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        .animate-bobbing {
+            animation: bobbing 2s ease-in-out infinite;
+        }
+        
+        /* Scrollbar Styling for Webkit Browsers */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="importmap">
+    {
+      "imports": {
+        "@react-google-maps/api": "https://aistudiocdn.com/@react-google-maps/api@^2.20.7",
+        "react/": "https://aistudiocdn.com/react@^19.1.1/",
+        "react": "https://aistudiocdn.com/react@^19.1.1",
+        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.19.0",
+        "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/"
+      }
+    }
+    </script>
+    <script type="module" src="index.tsx"></script>
+</body>
+</html>

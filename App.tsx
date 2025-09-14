@@ -41,7 +41,7 @@ const App: React.FC = () => {
     const [selectedResult, setSelectedResult] = useState<AppResult | null>(null);
     const [ratingFilter, setRatingFilter] = useState<number>(0); // 0 for all, 3 for 3+, 4 for 4+
     const [openNowFilter, setOpenNowFilter] = useState<boolean>(true);
-    const [listState, setListState] = useState<'hidden' | 'collapsed' | 'expanded'>('hidden');
+    const [listState, setListState] = useState<'hidden' | 'collapsed' | 'expanded' | 'fullscreen'>('hidden');
 
     // FIX: Removed 'window.' prefix to resolve namespace error.
     // FIX: Replaced google.maps.Map with `any` to resolve namespace error.

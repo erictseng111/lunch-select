@@ -71,6 +71,17 @@ const FilterControls: React.FC<FilterControlsProps> = ({ ratingFilter, openNowFi
     );
 }
 
+const ExpandIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4h4m12 4V4h-4M4 16v4h4m12-4v4h-4" />
+    </svg>
+);
+  
+const CollapseIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 4H4v4m12-4h4v4M8 20H4v-4m12 4h4v-4" />
+    </svg>
+);
 
 interface ResultsListProps {
   results: AppResult[];
@@ -80,14 +91,13 @@ interface ResultsListProps {
   openNowFilter: boolean;
   onRatingChange: (rating: number) => void;
   onOpenNowChange: (isOpen: boolean) => void;
-  listState: 'hidden' | 'collapsed' | 'expanded';
-  setListState: (state: 'hidden' | 'collapsed' | 'expanded') => void;
+  listState: 'hidden' | 'collapsed' | 'expanded' | 'fullscreen';
+  setListState: (state: 'hidden' | 'collapsed' | 'expanded' | 'fullscreen') => void;
 }
 
 const ResultsList: React.FC<ResultsListProps> = ({ results, onResultSelect, onClose, ratingFilter, openNowFilter, onRatingChange, onOpenNowChange, listState, setListState }) => {
     const sheetRef = useRef<HTMLDivElement>(null);
     const dragState = useRef({ startY: 0, isDragging: false });
-    const isExpanded = listState === 'expanded';
 
     const handleTouchStart = (e: React.TouchEvent) => {
         if ((e.target as HTMLElement).closest('button')) return;
@@ -103,8 +113,15 @@ const ResultsList: React.FC<ResultsListProps> = ({ results, onResultSelect, onCl
         
         const currentY = e.touches[0].clientY;
         const deltaY = currentY - dragState.current.startY;
+        
+        if (listState === 'fullscreen') {
+            const newTranslateY = Math.max(0, deltaY);
+            sheetRef.current.style.transform = `translateY(${newTranslateY}px)`;
+            return;
+        }
+
         const collapsedTranslateY = sheetRef.current.offsetHeight - 120;
-        const currentTranslateY = isExpanded ? deltaY : collapsedTranslateY + deltaY;
+        const currentTranslateY = listState === 'expanded' ? deltaY : collapsedTranslateY + deltaY;
         const newTranslateY = Math.max(0, Math.min(currentTranslateY, collapsedTranslateY));
         
         sheetRef.current.style.transform = `translateY(${newTranslateY}px)`;
@@ -121,42 +138,59 @@ const ResultsList: React.FC<ResultsListProps> = ({ results, onResultSelect, onCl
         sheetRef.current.style.transform = '';
 
         if (Math.abs(deltaY) < 10) {
-            setListState(isExpanded ? 'collapsed' : 'expanded');
+            if (listState === 'expanded') setListState('collapsed');
+            else if (listState === 'collapsed') setListState('expanded');
             return;
         }
 
         const sheetHeight = sheetRef.current.offsetHeight;
-        if (isExpanded) {
-            if (deltaY > sheetHeight * 0.2) setListState('collapsed');
-        } else {
-            if (deltaY < -sheetHeight * 0.2) setListState('expanded');
+        const threshold = sheetHeight * 0.25;
+
+        if (deltaY > threshold) { // Swiping down
+            if (listState === 'fullscreen') setListState('expanded');
+            else if (listState === 'expanded') setListState('collapsed');
+        } else if (deltaY < -threshold) { // Swiping up
+            if (listState === 'collapsed') setListState('expanded');
         }
     };
 
+    const isFullscreen = listState === 'fullscreen';
+    const isCollapsed = listState === 'collapsed';
+
     const containerClasses = [
         "absolute z-20 w-full card overflow-hidden flex flex-col",
-        "bottom-0 right-0 left-0 rounded-t-2xl h-[50vh]",
-        "transition-transform duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]",
+        "bottom-0 right-0 left-0 rounded-t-2xl",
+        "transition-all duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]",
+        isFullscreen ? 'h-[calc(100vh-4rem)]' : 'h-[50vh]',
+        isCollapsed ? 'translate-y-[calc(50vh-120px)]' : 'translate-y-0',
         "md:left-auto md:bottom-4 md:right-4 md:rounded-2xl md:max-w-sm md:h-auto md:max-h-[calc(100vh-6rem)] md:transform-none",
-        isExpanded ? "translate-y-0" : "translate-y-[calc(50vh-120px)] md:translate-y-0",
     ].join(' ');
 
     return (
         <div ref={sheetRef} className={containerClasses}>
             <div
-                className="flex-shrink-0 touch-none"
+                className="flex-shrink-0 touch-none cursor-grab"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
             >
-                <div className="w-10 h-1.5 bg-gray-500 rounded-full mx-auto mt-2 cursor-grab"></div>
+                <div className="w-10 h-1.5 bg-gray-500 rounded-full mx-auto mt-2"></div>
                 <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
                     <h2 className="text-lg font-bold text-white">為您找到 {results.length} 間餐廳</h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors z-10">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                    <div className="flex items-center space-x-1">
+                        <button
+                            onClick={() => setListState(listState === 'fullscreen' ? 'expanded' : 'fullscreen')}
+                            className="text-gray-400 hover:text-white transition-colors z-10 p-2 rounded-full hover:bg-white/10"
+                            aria-label={listState === 'fullscreen' ? '縮小' : '全螢幕'}
+                        >
+                            {listState === 'fullscreen' ? <CollapseIcon /> : <ExpandIcon />}
+                        </button>
+                        <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors z-10 p-2 rounded-full hover:bg-white/10">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
             <FilterControls

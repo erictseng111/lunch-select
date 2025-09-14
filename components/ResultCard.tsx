@@ -82,6 +82,20 @@ const ResultCard: React.FC<ResultCardProps> = ({ result, onClose }) => {
   // Google's weekday_text starts with Monday, so we need to adjust Sunday's index.
   const googleApiDayIndex = todayIndex === 0 ? 6 : todayIndex - 1;
 
+  // Calculate rating distribution from the available sample of reviews
+  const ratingCounts: { [key: number]: number } = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  let totalReviewsInSample = 0;
+
+  if (result.reviews && result.reviews.length > 0) {
+      result.reviews.forEach(review => {
+          const rating = Math.round(review.rating); // Round to nearest integer for bucketing
+          if (rating >= 1 && rating <= 5) {
+              ratingCounts[rating]++;
+              totalReviewsInSample++;
+          }
+      });
+  }
+
   return (
     <div className="absolute z-20 w-full card overflow-y-auto 
                    bottom-0 right-0 left-0 rounded-t-2xl max-w-full h-[50vh] animate-slide-in-up
@@ -175,6 +189,37 @@ const ResultCard: React.FC<ResultCardProps> = ({ result, onClose }) => {
                 {/* 7. User Reviews */}
                 {result.reviews && result.reviews.length > 0 && (
                     <InfoSection title="用戶評論">
+                        {/* Rating Distribution sub-section */}
+                        <div className="mb-6 border-b border-white/10 pb-6">
+                            <h4 className="text-base font-semibold text-white mb-1">總體評分 & 最新評論樣本</h4>
+                            {result.rating != null && (
+                                <div className="flex items-center space-x-2 text-sm text-gray-400 mb-4">
+                                    <span className="font-semibold text-accent-gold text-base">{result.rating.toFixed(1)} ★</span>
+                                    <span>/ 總共 {result.user_ratings_total} 則評論</span>
+                                </div>
+                            )}
+                            <div className="space-y-2">
+                                {[5, 4, 3, 2, 1].map(star => {
+                                    const count = ratingCounts[star] || 0;
+                                    const percentage = totalReviewsInSample > 0 ? (count / totalReviewsInSample) * 100 : 0;
+                                    return (
+                                        <div key={star} className="flex items-center space-x-3 text-sm">
+                                            <span className="text-gray-400 w-8">{star} 星</span>
+                                            <div className="flex-1 bg-gray-700 rounded-full h-2.5">
+                                                <div 
+                                                    className="bg-accent-gold h-2.5 rounded-full" 
+                                                    style={{ width: `${percentage}%` }}
+                                                ></div>
+                                            </div>
+                                            <span className="text-gray-300 w-12 text-right">{count} 則</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-3 text-center">** 長條圖僅顯示由 Google 提供之最新 {totalReviewsInSample} 則評論樣本，不代表整體分佈。</p>
+                        </div>
+
+                        {/* Individual reviews */}
                         <div className="space-y-6">
                             {result.reviews.slice(0, 3).map((review, index) => (
                                 <ReviewItem key={index} review={review} />

@@ -39,7 +39,10 @@ const App: React.FC = () => {
     const [cuisineSuggestions, setCuisineSuggestions] = useState<string[]>([]);
     const [showCuisineSuggestions, setShowCuisineSuggestions] = useState(false);
     const [results, setResults] = useState<AppResult[]>([]);
+    const [filteredResults, setFilteredResults] = useState<AppResult[]>([]);
     const [selectedResult, setSelectedResult] = useState<AppResult | null>(null);
+    const [ratingFilter, setRatingFilter] = useState<number>(0); // 0 for all, 3 for 3+, 4 for 4+
+    const [openNowFilter, setOpenNowFilter] = useState<boolean>(true);
 
     // FIX: Removed 'window.' prefix to resolve namespace error.
     // FIX: Replaced google.maps.Map with `any` to resolve namespace error.
@@ -87,6 +90,20 @@ const App: React.FC = () => {
         }
     }, [isLoaded, currentLocation]);
     
+    useEffect(() => {
+        let tempResults = [...results];
+
+        if (openNowFilter) {
+            tempResults = tempResults.filter(result => result.opening_hours?.open_now === true);
+        }
+
+        if (ratingFilter > 0) {
+            tempResults = tempResults.filter(result => result.rating != null && result.rating >= ratingFilter);
+        }
+
+        setFilteredResults(tempResults);
+    }, [results, ratingFilter, openNowFilter]);
+
     const handleSuggestCuisines = async () => {
         setShowCuisineSuggestions(true);
         setIsCuisineLoading(true);
@@ -110,6 +127,8 @@ const App: React.FC = () => {
         setResults([]);
         setSelectedResult(null);
         setShowCuisineSuggestions(false);
+        setRatingFilter(0);
+        setOpenNowFilter(true);
         
         const placesService = new google.maps.places.PlacesService(map);
         // FIX: Switched from location+radius to map bounds for more relevant results.
@@ -126,12 +145,12 @@ const App: React.FC = () => {
                 // FIX: Sort results by rating in descending order.
                 placeResults.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
 
-                const openRestaurants = placeResults.filter(p => p.opening_hours?.open_now);
-                const topResults = openRestaurants.slice(0, 5);
+                // Don't pre-filter by open_now. Slice to prevent too many API calls.
+                const topResults = placeResults.slice(0, 10);
                 
                 if (topResults.length === 0) {
                     setIsLoading(false);
-                    alert(`在此區域找不到營業中的 ${query} 餐廳。`);
+                    alert(`在此區域找不到 ${query} 餐廳。`);
                     return;
                 }
                 
@@ -213,7 +232,7 @@ const App: React.FC = () => {
                 center={currentLocation}
                 onLoad={onLoad}
                 onUnmount={onUnmount}
-                results={results}
+                results={filteredResults}
                 onMarkerClick={handleResultSelect}
                 selectedResult={selectedResult}
             />
@@ -234,9 +253,13 @@ const App: React.FC = () => {
             )}
             {results.length > 0 && !selectedResult && (
                 <ResultsList 
-                    results={results}
+                    results={filteredResults}
                     onResultSelect={handleResultSelect}
                     onClose={() => setResults([])}
+                    ratingFilter={ratingFilter}
+                    openNowFilter={openNowFilter}
+                    onRatingChange={setRatingFilter}
+                    onOpenNowChange={setOpenNowFilter}
                 />
             )}
             {selectedResult && (

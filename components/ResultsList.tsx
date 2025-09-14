@@ -17,48 +17,121 @@ const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
     );
 };
 
+interface FilterControlsProps {
+    ratingFilter: number;
+    openNowFilter: boolean;
+    onRatingChange: (rating: number) => void;
+    onOpenNowChange: (isOpen: boolean) => void;
+}
+
+const FilterControls: React.FC<FilterControlsProps> = ({ ratingFilter, openNowFilter, onRatingChange, onOpenNowChange }) => {
+    const ratingOptions = [
+        { label: '全部', value: 0 },
+        { label: '3★+', value: 3 },
+        { label: '4★+', value: 4 },
+    ];
+
+    return (
+        <div className="p-3 bg-black/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10">
+            <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-gray-300">評分:</span>
+                <div className="flex items-center bg-white/10 rounded-lg p-1">
+                    {ratingOptions.map(opt => (
+                        <button
+                            key={opt.value}
+                            onClick={() => onRatingChange(opt.value)}
+                            className={`px-3 py-1 text-xs font-bold rounded-md transition-colors ${
+                                ratingFilter === opt.value
+                                    ? 'bg-indigo-500 text-white shadow-md'
+                                    : 'text-gray-300 hover:bg-white/20'
+                            }`}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            <label htmlFor="open-toggle" className="flex items-center cursor-pointer select-none">
+                <div className="relative">
+                    <input 
+                        type="checkbox" 
+                        id="open-toggle" 
+                        className="sr-only peer" 
+                        checked={openNowFilter} 
+                        onChange={(e) => onOpenNowChange(e.target.checked)} 
+                    />
+                    <div className="block bg-gray-600 w-10 h-6 rounded-full peer-checked:bg-indigo-500 transition"></div>
+                    <div className="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition transform peer-checked:translate-x-full"></div>
+                </div>
+                <div className="ml-3 text-gray-300 text-sm font-medium">
+                    僅顯示營業中
+                </div>
+            </label>
+        </div>
+    );
+}
+
+
 interface ResultsListProps {
   results: AppResult[];
   onResultSelect: (result: AppResult) => void;
   onClose: () => void;
+  ratingFilter: number;
+  openNowFilter: boolean;
+  onRatingChange: (rating: number) => void;
+  onOpenNowChange: (isOpen: boolean) => void;
 }
 
-const ResultsList: React.FC<ResultsListProps> = ({ results, onResultSelect, onClose }) => {
+const ResultsList: React.FC<ResultsListProps> = ({ results, onResultSelect, onClose, ratingFilter, openNowFilter, onRatingChange, onOpenNowChange }) => {
   return (
     <div className="absolute z-20 w-full card overflow-hidden flex flex-col 
-                   bottom-0 right-0 left-0 rounded-t-2xl max-w-full max-h-[60vh] animate-slide-in-up
+                   bottom-0 right-0 left-0 rounded-t-2xl max-w-full max-h-[70vh] animate-slide-in-up
                    md:left-auto md:bottom-4 md:right-4 md:rounded-2xl md:max-w-sm md:max-h-[calc(100vh-6rem)] md:animate-fade-in-up">
       <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/20 flex-shrink-0">
-        <h2 className="text-lg font-bold text-white">為您推薦這 {results.length} 間餐廳</h2>
+        <h2 className="text-lg font-bold text-white">為您找到 {results.length} 間餐廳</h2>
         <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
       </div>
-      <ul className="divide-y divide-white/10 overflow-y-auto">
-        {results.map((result) => (
-          <li key={result.name + result.details} className="p-4 hover:bg-white/5 cursor-pointer transition-colors" onClick={() => onResultSelect(result)}>
-            <div className="flex items-start space-x-4">
-              <div 
-                className="w-24 h-24 bg-cover bg-center rounded-md flex-shrink-0 border border-white/10" 
-                style={{ backgroundImage: `url(${result.photoUrl || 'https://placehold.co/150x150/2c2c2e/f5f5f7?text=Image'})` }}
-              ></div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-white truncate">{result.name}</h3>
-                {result.rating != null && (
-                  <div className="flex items-center space-x-2 mt-1 text-sm text-gray-400">
-                    <span className="font-semibold text-accent-gold">{result.rating.toFixed(1)}</span>
-                    <StarRating rating={result.rating} />
-                    <span className="flex-shrink-0">({result.user_ratings_total})</span>
-                  </div>
-                )}
-                <p className="text-xs text-gray-400 mt-1.5 line-clamp-2">{result.details}</p>
+      <FilterControls 
+        ratingFilter={ratingFilter}
+        openNowFilter={openNowFilter}
+        onRatingChange={onRatingChange}
+        onOpenNowChange={onOpenNowChange}
+      />
+      {results.length > 0 ? (
+        <ul className="divide-y divide-white/10 overflow-y-auto">
+          {results.map((result) => (
+            <li key={result.place_id} className="p-4 hover:bg-white/5 cursor-pointer transition-colors" onClick={() => onResultSelect(result)}>
+              <div className="flex items-start space-x-4">
+                <div 
+                  className="w-24 h-24 bg-cover bg-center rounded-md flex-shrink-0 border border-white/10" 
+                  style={{ backgroundImage: `url(${result.photoUrl || 'https://placehold.co/150x150/2c2c2e/f5f5f7?text=Image'})` }}
+                ></div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-white truncate">{result.name}</h3>
+                  {result.rating != null && (
+                    <div className="flex items-center space-x-2 mt-1 text-sm text-gray-400">
+                      <span className="font-semibold text-accent-gold">{result.rating.toFixed(1)}</span>
+                      <StarRating rating={result.rating} />
+                      <span className="flex-shrink-0">({result.user_ratings_total})</span>
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-400 mt-1.5 line-clamp-2">{result.details}</p>
+                </div>
               </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-black/10">
+            <span className="text-4xl mb-4" role="img" aria-label="shrug">🤷‍♀️</span>
+            <h3 className="font-bold text-white">找不到符合條件的餐廳</h3>
+            <p className="text-sm text-gray-400 mt-2">請試著放寬您的篩選條件，或在附近進行新的搜尋。</p>
+        </div>
+      )}
     </div>
   );
 };

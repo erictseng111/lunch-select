@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLoadScript } from '@react-google-maps/api';
 
@@ -43,6 +44,7 @@ const App: React.FC = () => {
     const [selectedResult, setSelectedResult] = useState<AppResult | null>(null);
     const [ratingFilter, setRatingFilter] = useState<number>(0); // 0 for all, 3 for 3+, 4 for 4+
     const [openNowFilter, setOpenNowFilter] = useState<boolean>(true);
+    const [listState, setListState] = useState<'hidden' | 'collapsed' | 'expanded'>('hidden');
 
     // FIX: Removed 'window.' prefix to resolve namespace error.
     // FIX: Replaced google.maps.Map with `any` to resolve namespace error.
@@ -125,6 +127,7 @@ const App: React.FC = () => {
         setIsLoading(true);
         setLoadingMessage(`正在尋找 ${query}...`);
         setResults([]);
+        setListState('hidden');
         setSelectedResult(null);
         setShowCuisineSuggestions(false);
         setRatingFilter(0);
@@ -151,6 +154,7 @@ const App: React.FC = () => {
                 if (topResults.length === 0) {
                     setIsLoading(false);
                     alert(`在此區域找不到 ${query} 餐廳。`);
+                    setListState('hidden');
                     return;
                 }
                 
@@ -199,7 +203,11 @@ const App: React.FC = () => {
                 );
                 
                 setResults(detailedResults);
+                if (detailedResults.length > 0) {
+                    setListState('expanded');
+                }
             } else {
+                setListState('hidden');
                 alert(`搜尋 "${query}" 時發生錯誤: ${status}`);
             }
             setIsLoading(false);
@@ -251,15 +259,20 @@ const App: React.FC = () => {
                     isLoading={isCuisineLoading}
                 />
             )}
-            {results.length > 0 && !selectedResult && (
+            {listState !== 'hidden' && !selectedResult && (
                 <ResultsList 
                     results={filteredResults}
                     onResultSelect={handleResultSelect}
-                    onClose={() => setResults([])}
+                    onClose={() => {
+                        setResults([])
+                        setListState('hidden');
+                    }}
                     ratingFilter={ratingFilter}
                     openNowFilter={openNowFilter}
                     onRatingChange={setRatingFilter}
                     onOpenNowChange={setOpenNowFilter}
+                    listState={listState}
+                    setListState={setListState}
                 />
             )}
             {selectedResult && (

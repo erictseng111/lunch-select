@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { AppResult } from '../types';
 
@@ -136,10 +135,10 @@ const ResultsList: React.FC<ResultsListProps> = ({ results, onResultSelect, onCl
 
     const containerClasses = [
         "absolute z-20 w-full card overflow-hidden flex flex-col",
-        "bottom-0 right-0 left-0 rounded-t-2xl h-[70vh]",
+        "bottom-0 right-0 left-0 rounded-t-2xl h-[50vh]",
         "transition-transform duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]",
         "md:left-auto md:bottom-4 md:right-4 md:rounded-2xl md:max-w-sm md:h-auto md:max-h-[calc(100vh-6rem)] md:transform-none",
-        isExpanded ? "translate-y-0" : "translate-y-[calc(70vh-120px)] md:translate-y-0",
+        isExpanded ? "translate-y-0" : "translate-y-[calc(50vh-120px)] md:translate-y-0",
     ].join(' ');
 
     return (

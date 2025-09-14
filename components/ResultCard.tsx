@@ -83,8 +83,8 @@ const ResultCard: React.FC<ResultCardProps> = ({ result, onClose }) => {
   const googleApiDayIndex = todayIndex === 0 ? 6 : todayIndex - 1;
 
   return (
-    <div className="absolute z-20 w-full card overflow-hidden flex flex-col 
-                   bottom-0 right-0 left-0 rounded-t-2xl max-w-full max-h-[75vh] animate-slide-in-up
+    <div className="absolute z-20 w-full card overflow-y-auto 
+                   bottom-0 right-0 left-0 rounded-t-2xl max-w-full h-[50vh] animate-slide-in-up
                    md:left-auto md:bottom-4 md:right-4 md:rounded-2xl md:max-w-sm md:max-h-[calc(100vh-4rem)] md:animate-fade-in-up">
         {/* 1. Restaurant Preview Image */}
         <div className="relative flex-shrink-0">
@@ -98,11 +98,10 @@ const ResultCard: React.FC<ResultCardProps> = ({ result, onClose }) => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
         </div>
-      
-        <div className="p-4 flex-1 overflow-y-auto">
-            <h2 className="text-2xl font-bold text-white">{result.name}</h2>
-            
-            {/* 2. Rating and Reviews */}
+
+        {/* 2. Sticky Header with Name and Rating */}
+        <div className="sticky top-0 z-10 p-4 bg-[rgba(31,41,55,0.8)] backdrop-blur-md border-b border-white/10">
+            <h2 className="text-2xl font-bold text-white truncate">{result.name}</h2>
             {result.rating != null && (
               <div className="flex items-center space-x-2 mt-2 text-sm text-gray-400">
                 <span className="font-semibold text-accent-gold text-base">{result.rating.toFixed(1)}</span>
@@ -110,8 +109,10 @@ const ResultCard: React.FC<ResultCardProps> = ({ result, onClose }) => {
                 <span>({result.user_ratings_total} 則評論)</span>
               </div>
             )}
-
-            <div className="mt-4 flex flex-col">
+        </div>
+      
+        <div className="p-4">
+            <div className="flex flex-col">
                 {/* 3. AI Summary */}
                 <InfoSection title="AI 總覽">
                     <p className="text-sm text-gray-300 leading-relaxed">{result.details}</p>

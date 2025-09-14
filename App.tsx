@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLoadScript } from '@react-google-maps/api';
 
@@ -244,13 +241,15 @@ const App: React.FC = () => {
                 onMarkerClick={handleResultSelect}
                 selectedResult={selectedResult}
             />
-            <Controls 
-                onSuggestCuisines={handleSuggestCuisines}
-                onFeelingLucky={handleFeelingLucky}
-                currentArea={currentArea}
-                isLoading={isLoading || !map}
-                loadingMessage={loadingMessage}
-            />
+            {listState === 'hidden' && (
+                <Controls 
+                    onSuggestCuisines={handleSuggestCuisines}
+                    onFeelingLucky={handleFeelingLucky}
+                    currentArea={currentArea}
+                    isLoading={isLoading || !map}
+                    loadingMessage={loadingMessage}
+                />
+            )}
             {showCuisineSuggestions && (
                 <CuisineSuggestions
                     suggestions={cuisineSuggestions}

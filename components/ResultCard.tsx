@@ -81,15 +81,30 @@ const ResultCard: React.FC<ResultCardProps> = ({ result, onClose }) => {
                     </InfoSection>
                 )}
 
-                {/* 5. Reservable */}
+                {/* 5. Reservable & Website Link */}
                 <InfoSection title="預約資訊">
-                    <div className="flex items-center text-sm">
-                        {result.reservable === true && <span className="text-green-400 mr-2">✔️</span>}
-                        {result.reservable === false && <span className="text-red-400 mr-2">❌</span>}
-                        <span className={result.reservable ? 'text-white' : 'text-gray-400'}>
-                            {result.reservable === true ? '可接受預約' : 
-                             result.reservable === false ? '不接受預約' : '預約資訊未提供'}
-                        </span>
+                    <div className="space-y-3">
+                        <div className="flex items-center text-sm">
+                            {result.reservable === true && <span className="text-green-400 mr-2">✔️</span>}
+                            {result.reservable === false && <span className="text-red-400 mr-2">❌</span>}
+                            <span className={result.reservable === undefined ? 'text-gray-400' : 'text-white'}>
+                                {result.reservable === true ? '可接受預約' : 
+                                 result.reservable === false ? '不接受預約' : '預約資訊未提供'}
+                            </span>
+                        </div>
+                        {result.website && (
+                            <a 
+                                href={result.website} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center w-full text-center btn btn-primary"
+                            >
+                                前往預訂或查看官網
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </a>
+                        )}
                     </div>
                 </InfoSection>
 

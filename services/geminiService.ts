@@ -1,8 +1,8 @@
 // FIX: Implement the full Gemini service for interacting with the Gemini API.
 import { GoogleGenAI, Type } from "@google/genai";
 
-// FIX: Hardcoded API key to resolve persistent invalid key errors in this environment.
-const ai = new GoogleGenAI({ apiKey: 'AIzaSyAxQ17KzCgWqbGvtxGqomTQYP56c8U-Eh4' });
+// FIX: Use environment variable for API key as per security best practices and guidelines.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 
 // Define the response schema for cuisine suggestions.
 const cuisineSuggestionsSchema = {
@@ -37,7 +37,8 @@ export const suggestCuisines = async (location: string): Promise<string[]> => {
       },
     });
 
-    const jsonString = response.text;
+    // FIX: Trim whitespace from the response text before parsing to prevent JSON errors.
+    const jsonString = response.text.trim();
     const parsed = JSON.parse(jsonString);
     return parsed.cuisines || [];
 

@@ -15,4 +15,5 @@ export interface AppResult {
         weekday_text?: string[];
     };
     reservable?: boolean;
+    website?: string;
 }

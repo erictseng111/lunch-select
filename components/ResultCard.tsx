@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppResult } from '../types';
+import { AppResult, Review } from '../types';
 
 const StarIcon: React.FC<{className: string}> = ({className}) => (<svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${className}`} viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>);
 
@@ -32,6 +32,49 @@ const InfoSection: React.FC<{ title: string; children: React.ReactNode }> = ({ t
         {children}
     </div>
 );
+
+// --- Components for Reviews ---
+const ReviewStarIcon: React.FC<{className: string}> = ({className}) => (<svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${className}`} viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>);
+
+const ReviewStarRating: React.FC<{ rating?: number }> = ({ rating = 0 }) => {
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+    return (
+        <div className="flex items-center">
+            {[...Array(fullStars)].map((_, i) => <ReviewStarIcon key={`full-${i}`} className="text-accent-gold" />)}
+            {halfStar && <ReviewStarIcon key="half" className="text-accent-gold opacity-50" />}
+            {[...Array(emptyStars)].map((_, i) => <ReviewStarIcon key={`empty-${i}`} className="text-gray-600" />)}
+        </div>
+    );
+};
+
+interface ReviewItemProps {
+    review: Review;
+}
+
+const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
+    return (
+        <div className="flex items-start space-x-3">
+            <img 
+                src={review.profile_photo_url} 
+                alt={`${review.author_name}'s profile`}
+                className="w-10 h-10 rounded-full bg-gray-700 object-cover"
+                referrerPolicy="no-referrer"
+            />
+            <div className="flex-1">
+                <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-white">{review.author_name}</h4>
+                    <span className="text-xs text-gray-500">{review.relative_time_description}</span>
+                </div>
+                <div className="mt-1">
+                    <ReviewStarRating rating={review.rating} />
+                </div>
+                {review.text && <p className="text-sm text-gray-300 mt-2 leading-relaxed whitespace-pre-wrap">{review.text}</p>}
+            </div>
+        </div>
+    );
+};
 
 
 const ResultCard: React.FC<ResultCardProps> = ({ result, onClose }) => {
@@ -125,6 +168,17 @@ const ResultCard: React.FC<ResultCardProps> = ({ result, onClose }) => {
                                 </li>
                             ))}
                         </ul>
+                    </InfoSection>
+                )}
+
+                {/* 7. User Reviews */}
+                {result.reviews && result.reviews.length > 0 && (
+                    <InfoSection title="用戶評論">
+                        <div className="space-y-6">
+                            {result.reviews.slice(0, 3).map((review, index) => (
+                                <ReviewItem key={index} review={review} />
+                            ))}
+                        </div>
                     </InfoSection>
                 )}
             </div>

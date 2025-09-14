@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLoadScript } from '@react-google-maps/api';
 
@@ -143,7 +144,7 @@ const App: React.FC = () => {
                             const detailsService = new google.maps.places.PlacesService(map);
                             const request = {
                                 placeId: place.place_id!,
-                                fields: ['opening_hours', 'website', 'reservable'],
+                                fields: ['opening_hours', 'website', 'reservable', 'reviews'],
                             };
                             detailsService.getDetails(request, (result, status) => {
                                 if (status === google.maps.places.PlacesServiceStatus.OK && result) {
@@ -173,6 +174,7 @@ const App: React.FC = () => {
                             opening_hours: placeDetails.opening_hours || place.opening_hours,
                             website: placeDetails.website,
                             reservable: placeDetails.reservable,
+                            reviews: placeDetails.reviews,
                         };
                     })
                 );

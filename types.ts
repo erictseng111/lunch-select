@@ -1,3 +1,12 @@
+// types.ts
+export interface Review {
+    author_name: string;
+    profile_photo_url: string;
+    rating: number;
+    text: string;
+    relative_time_description: string;
+}
+
 // FIX: Replaced google.maps.LatLng with its expected structure to resolve namespace error.
 export interface AppResult {
     place_id?: string;
@@ -16,4 +25,5 @@ export interface AppResult {
     };
     reservable?: boolean;
     website?: string;
+    reviews?: Review[];
 }
